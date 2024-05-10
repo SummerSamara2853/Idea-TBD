@@ -1,39 +1,60 @@
 import pygame
-from player import Player
+import sys
 
 
+# Set up screen
+size = (800, 600)
+screen = pygame.display.set_mode((size[0], size[1]))
+pygame.display.set_caption("GAMEEEEEE")
 
-# set up pygame modules
-pygame.init()
-pygame.font.init()
-my_font = pygame.font.SysFont('Arial', 15)
-pygame.display.set_caption("AP CSP Pygame!")
+# Background
+bg_img = pygame.image.load("background.png").convert()
 
-# set up variables for the display
-size = (400, 300)
-screen = pygame.display.set_mode(size)
-p = Player(10,10)
-name = ""
+# Player size/speed
+player_size = 50
+player_x = size[0] // 2 - player_size // 2
+player_y = size[1] // 2 - player_size // 2
+player_speed = 5
 
-# render the text for later
-display_name = my_font.render(name, True, (255, 255, 255))
+# World size
+world_width, world_height = 1600, 1200
 
-# The loop will carry on until the user exits the game (e.g. clicks the close button).
-run = True
+# Main game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-# -------- Main Program Loop -----------
-while run:
-    # --- Main event loop
-    for event in pygame.event.get():  # User did something
-        if event.type == pygame.QUIT:  # If user clicked close
-            run = False
+    # Player movement
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        player_x -= player_speed
+    if keys[pygame.K_RIGHT]:
+        player_x += player_speed
+    if keys[pygame.K_UP]:
+        player_y -= player_speed
+    if keys[pygame.K_DOWN]:
+        player_y += player_speed
 
-    screen.fill((0, 0, 0))
-    screen.blit(display_name, (0, 0))
-    screen.blit(p.image, p.rect)
-    pygame.display.update()
+    # Make player stay in world boundaries
+    player_x = max(0, min(world_width - player_size, player_x))
+    player_y = max(0, min(world_height - player_size, player_y))
 
-# Once we have exited the main program loop we can stop the game engine:
+    # Calculate the view pos.
+    view_x = max(0, min(world_width - size[0], player_x - size[0] // 2))
+    view_y = max(0, min(world_height - size[1], player_y - size[1] // 2))
+
+    # Draw the bg
+    screen.blit(bg_img, (0 - view_x, 0 - view_y))
+
+    # Drtw the player
+    pygame.draw.rect(screen, (255, 255, 255), (player_x - view_x, player_y - view_y, player_size, player_size))
+
+    # Update display
+    pygame.display.flip()
+
+
+# Endddd
 pygame.quit()
-
-
+sys.exit()
