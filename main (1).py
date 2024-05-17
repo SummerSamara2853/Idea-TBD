@@ -1,33 +1,39 @@
+
 import pygame
 import sys
 
-# Set up screen
-size = (800, 600)
-screen = pygame.display.set_mode((size[0], size[1]))
+pygame.init()
+
+# Set up
+screen_width = 800
+screen_height = 600
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("GAMEEEEEE")
 
-# Bg images
-bg_imgs = [pygame.image.load("background.png").convert() ]
-bg_width = bg_imgs[0].get_width()
-bg_height = bg_imgs[0].get_height()
+# Load background images into a list
+background_images = []
+for i in range(4):
+    image = pygame.image.load(f"background_{i}.png")
+    image = pygame.transform.scale(image, (screen_width, screen_height))
+    background_images.append(image)
 
-# Player size/speed
+# Player props
 player_size = 50
-player_x = size[0] // 2 - player_size // 2
-player_y = size[1] // 2 - player_size // 2
+player_x = screen_width // 2 - player_size // 2
+player_y = screen_height // 2 - player_size // 2
 player_speed = 5
 
-# World size
-world_width, world_height = bg_width * 4, bg_height * 4
+# Map boundaries
+world_width = background_images[0].get_width() * 2
+world_height = background_images[0].get_height() * 2
 
-# Main game loop
+
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # Player movement
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         player_x -= player_speed
@@ -38,26 +44,37 @@ while running:
     if keys[pygame.K_DOWN]:
         player_y += player_speed
 
-    # Make player stay in world boundaries
     player_x = max(0, min(world_width - player_size, player_x))
     player_y = max(0, min(world_height - player_size, player_y))
 
-    # Calculate the view pos.
-    view_x = max(0, min(world_width - size[0], player_x - size[0] // 2))
-    view_y = max(0, min(world_height - size[1], player_y - size[1] // 2))
+    view_x = max(0, min(world_width - screen_width, player_x - screen_width // 2))
+    view_y = max(0, min(world_height - screen_height, player_y - screen_height // 2))
 
-    # Draw the bg
-    for i in range(4):
-        for x in range(-bg_width, world_width, bg_width):
-            for y in range(-bg_height, world_height, bg_height):
-                screen.blit(bg_imgs[0], (x - view_x % bg_width, y - view_y % bg_height))
+    for row in range(0, 2):
+        # Loop through each column of background tiles
+        for column in range(0, 2):
+            # Determine the type of tile based on its position
+            if row % 2 == 0:
+                if column % 2 == 0:
+                    tile_type = 0  #  image 0 for even rows and columns
+                else:
+                    tile_type = 3  #  image 3 for odd columns in even rows
+            else:
+                if column % 2 == 0:
+                    tile_type = 1  # image 1 for even columns in odd rows
+                else:
+                    tile_type = 2   # image 2 for odd rows and columns
 
-    # Draw the player
+            # Calc the position to blit the background image
+            bg_x = column * background_images[0].get_width() - view_x
+            bg_y = row * background_images[0].get_height() - view_y
+
+            # Blit the bg image at the position
+            screen.blit(background_images[tile_type], (bg_x, bg_y))
+
     pygame.draw.rect(screen, (255, 255, 255), (player_x - view_x, player_y - view_y, player_size, player_size))
 
-    # Update display
     pygame.display.flip()
 
-# End
 pygame.quit()
 sys.exit()
