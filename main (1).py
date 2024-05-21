@@ -137,7 +137,6 @@ while running:
         screen.blit(apple_image, (apple_pos[0] - view_x, apple_pos[1] - view_y))
 
 
-
     # Draw player (and direction)
     if player_direction == "right":
         screen.blit(player_image, (player_x - view_x, player_y - view_y))
