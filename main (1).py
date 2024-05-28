@@ -36,25 +36,26 @@ tree_size = tree_image.get_width()
 player_x = screen_width // 2 - player_size // 2
 player_y = screen_height // 2 - player_size // 2
 player_speed = 5
-player_direction = "right"  # initial direction
+player_direction = "right"  # Initial direction
 
 # squirrel props
 squirrel_x = random.randint(0, screen_width - player_size)
 squirrel_y = random.randint(0, screen_height - player_size)
-squirrel_speed = 1  
-squirrel_direction = "right"  # initial direction
+squirrel_speed = 1  # Reduced speed for the squirrel
+squirrel_direction = "right"  # Initial direction
 
 # tree and apple props
 tree_positions = []
 apple_positions = []
 num_trees = 6
+min_distance_between_trees = 100
 
 # map boundaries
 world_width = background_images[0].get_width() * 2
 world_height = background_images[0].get_height() * 2
 
 # set tree positions
-for i in range(num_trees):
+for _ in range(num_trees):
     tree_placed = False
     attempts = 0
     while not tree_placed and attempts < 100:
@@ -63,8 +64,8 @@ for i in range(num_trees):
         tile_x = tree_x // screen_width
         tile_y = tree_y // screen_height
         tile_type = (tile_x % 2 == 0 and tile_y % 2 == 0)  # make sure trees are only placed on tile 0
-
-        if tile_type:
+        too_close = any((abs(tree_x - tx) < min_distance_between_trees and abs(tree_y - ty) < min_distance_between_trees) for tx, ty in tree_positions)
+        if tile_type and not too_close:
             tree_positions.append((tree_x, tree_y))
             tree_placed = True
         attempts += 1
@@ -109,19 +110,18 @@ while running:
             # Determine the type of tile based on its position
             if row % 2 == 0:
                 if column % 2 == 0:
-                    tile_type = 0  #  image 0 for even rows and columns
+                    tile_type = 0 #  image 0 for even rows and columns
                 else:
-                    tile_type = 3  #  image 3 for odd columns in even rows
+                    tile_type = 3 #  image 3 for odd columns in even rows
             else:
                 if column % 2 == 0:
-                    tile_type = 1  # image 1 for even columns in odd rows
+                    tile_type = 1 # image 1 for even columns in odd rows
                 else:
-                    tile_type = 2  # image 2 for odd rows and columns
+                    tile_type = 2 # image 2 for odd rows and columns
 
             # Calc the position to blit the background image
             bg_x = column * background_images[tile_type].get_width() - view_x
             bg_y = row * background_images[tile_type].get_height() - view_y
-            # Blit the bg image at the position
             screen.blit(background_images[tile_type], (bg_x, bg_y))
 
             if tile_type == 0:
@@ -136,6 +136,35 @@ while running:
     for apple_pos in apple_positions:
         screen.blit(apple_image, (apple_pos[0] - view_x, apple_pos[1] - view_y))
 
+    # Check for apple collection by player
+    player_rect = pygame.Rect(player_x, player_y, player_size, player_size)
+    new_apple_positions = []
+    for apple_pos in apple_positions:
+        apple_rect = pygame.Rect(apple_pos[0], apple_pos[1], apple_image.get_width(), apple_image.get_height())
+        if player_rect.colliderect(apple_rect):
+            score += 1
+            tree_pos = random.choice(tree_positions)
+            new_apple_x = tree_pos[0] + random.randint(0, tree_image.get_width() - apple_image.get_width())
+            new_apple_y = tree_pos[1] + random.randint(0, tree_image.get_height() - apple_image.get_height())
+            new_apple_positions.append((new_apple_x, new_apple_y))
+        else:
+            new_apple_positions.append(apple_pos)
+    apple_positions = new_apple_positions
+
+    # Check for apple collection by squirrel
+
+    squirrel_rect = pygame.Rect(squirrel_x, squirrel_y, squirrel_image.get_width(), squirrel_image.get_height())
+    new_apple_positions = []
+    for apple_pos in apple_positions:
+        apple_rect = pygame.Rect(apple_pos[0], apple_pos[1], apple_image.get_width(), apple_image.get_height())
+        if squirrel_rect.colliderect(apple_rect):
+            tree_pos = random.choice(tree_positions)
+            new_apple_x = tree_pos[0] + random.randint(0, tree_image.get_width() - apple_image.get_width())
+            new_apple_y = tree_pos[1] + random.randint(0, tree_image.get_height() - apple_image.get_height())
+            new_apple_positions.append((new_apple_x, new_apple_y))
+        else:
+            new_apple_positions.append(apple_pos)
+    apple_positions = new_apple_positions
 
     # Draw player (and direction)
     if player_direction == "right":
@@ -149,6 +178,10 @@ while running:
     else:
         flipped_squirrel_image = pygame.transform.flip(squirrel_image, True, False)
         screen.blit(flipped_squirrel_image, (squirrel_x - view_x, squirrel_y - view_y))
+
+    # Display score
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
 
     pygame.display.flip()
 
