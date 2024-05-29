@@ -23,7 +23,7 @@ player_image = pygame.transform.scale(player_image, (80, 80))
 player_size = player_image.get_width()
 
 squirrel_image = pygame.image.load("squirrel.png")
-squirrel_image = pygame.transform.scale(squirrel_image, (60, 60))
+squirrel_image = pygame.transform.scale(squirrel_image, (70, 70))
 
 apple_image = pygame.image.load("apple.png")
 apple_image = pygame.transform.scale(apple_image, (40, 40))
@@ -35,13 +35,13 @@ tree_size = tree_image.get_width()
 # player props
 player_x = screen_width // 2 - player_size // 2
 player_y = screen_height // 2 - player_size // 2
-player_speed = 5
+player_speed = 4
 player_direction = "right"  # Initial direction
 
 # squirrel props
 squirrel_x = random.randint(0, screen_width - player_size)
 squirrel_y = random.randint(0, screen_height - player_size)
-squirrel_speed = 1  # Reduced speed for the squirrel
+squirrel_speed = 0.4
 squirrel_direction = "right"  # Initial direction
 
 # tree and apple props
@@ -131,6 +131,34 @@ while running:
                     tree_screen_y = tree_pos[1] - view_y
                     if bg_x <= tree_screen_x < bg_x + screen_width and bg_y <= tree_screen_y < bg_y + screen_height:
                         screen.blit(tree_image, (tree_screen_x, tree_screen_y))
+
+                # Move the squirrel towards the closest apple
+                        if apple_positions:
+                            # make closest apple the first apple in the list
+                            closest_apple = apple_positions[0]
+                            # calc the distance from the squirrel to the first apple
+                            closest_distance = abs(squirrel_x - closest_apple[0]) + abs(squirrel_y - closest_apple[1])
+                            # go through remaining apple positions
+                            for pos in apple_positions[1:]:
+                                # calc the distance from the squirrel to the current apple
+                                distance = abs(squirrel_x - pos[0]) + abs(squirrel_y - pos[1])
+                                # If this distance is less than the prev. closest distance --> update the closest distance and closest apple
+                                if distance < closest_distance:
+                                    closest_distance = distance
+                                    closest_apple = pos
+                            # Move the squirrel horizontally towards the closest apple (need to flip direction here)
+                            if squirrel_x < closest_apple[0]:
+                                squirrel_x += squirrel_speed
+                                squirrel_direction = "right"  # flip direction
+                            elif squirrel_x > closest_apple[0]:
+                                squirrel_x -= squirrel_speed
+                                squirrel_direction = "left"   # flip direction
+
+                            # Move the squirrel vertically towards the closest apple
+                            if squirrel_y < closest_apple[1]:
+                                squirrel_y += squirrel_speed
+                            elif squirrel_y > closest_apple[1]:
+                                squirrel_y -= squirrel_speed
 
     # Draw apples
     for apple_pos in apple_positions:
