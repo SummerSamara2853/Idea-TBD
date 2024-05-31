@@ -17,11 +17,17 @@ for i in range(4):
     image = pygame.transform.scale(image, (screen_width, screen_height))
     background_images.append(image)
 
-# load sprites
-player_image = pygame.image.load("player.png")
-player_image = pygame.transform.scale(player_image, (80, 80))
-player_size = player_image.get_width()
+# load character sprites
+p1_image = pygame.image.load("p1.png")
+p1_image = pygame.transform.scale(p1_image, (80, 80))
 
+p2_image = pygame.image.load("p2.png")
+p2_image = pygame.transform.scale(p2_image, (60, 80))
+
+p3_image = pygame.image.load("p3.png")
+p3_image = pygame.transform.scale(p3_image, (60, 80))
+
+# load other sprites
 squirrel_image = pygame.image.load("squirrel.png")
 squirrel_image = pygame.transform.scale(squirrel_image, (70, 70))
 
@@ -32,6 +38,33 @@ tree_image = pygame.image.load("tree.png")
 tree_image = pygame.transform.scale(tree_image, (130, 130))
 tree_size = tree_image.get_width()
 
+# function to display character selection screen
+def character_selection():
+    selected_character = None
+    while not selected_character:
+        screen.fill((59, 40, 0))
+        font = pygame.font.Font(None, 74)
+        text = font.render("Select your character!!!!!", True, (255, 255, 255))
+        screen.blit(text, (screen_width // 2 - text.get_width() // 2, 100))
+
+        # display characters
+        screen.blit(p1_image, (screen_width // 2 - 200, 300))
+        screen.blit(p2_image, (screen_width // 2 - 40, 300))
+        screen.blit(p3_image, (screen_width // 2 + 120, 300))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+#testinggggg
+character_selection()
+
+# Character selection
+player_image = pygame.image.load("p1.png") #note to myself: using p1 for now so player_image is defined while I change things
+player_size = player_image.get_width()
+
 # player props
 player_x = screen_width // 2 - player_size // 2
 player_y = screen_height // 2 - player_size // 2
@@ -41,7 +74,7 @@ player_direction = "right"  # Initial direction
 # squirrel props
 squirrel_x = random.randint(0, screen_width - player_size)
 squirrel_y = random.randint(0, screen_height - player_size)
-squirrel_speed = 0.4
+squirrel_speed = 1
 squirrel_direction = "right"  # Initial direction
 
 # tree and apple props
@@ -129,8 +162,8 @@ while running:
         # Ensure trees are drawn within the visible screen area
         if 0 <= tree_screen_x < screen_width and 0 <= tree_screen_y < screen_height:
             screen.blit(tree_image, (tree_screen_x, tree_screen_y))
-            
-                    
+
+
     # Move the squirrel towards the closest apple
     if apple_positions:
         # make closest apple the first apple in the list
