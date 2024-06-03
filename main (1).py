@@ -22,8 +22,8 @@ p1_image = pygame.image.load("p1.png")
 p1_image = pygame.transform.scale(p1_image, (80, 80))
 
 p2_image = pygame.image.load("p2.png")
-p2_image = pygame.transform.scale(p2_image, (60, 80))
-
+p2_image = pygame.transform.scale(p2_image, (60, 80)) 
+                         # made p2 and p3 smaller horizonally cs they looked funny
 p3_image = pygame.image.load("p3.png")
 p3_image = pygame.transform.scale(p3_image, (60, 80))
 
@@ -38,16 +38,16 @@ tree_image = pygame.image.load("tree.png")
 tree_image = pygame.transform.scale(tree_image, (130, 130))
 tree_size = tree_image.get_width()
 
-# function to display character selection screen
+# Function to display character selection screen
 def character_selection():
     selected_character = None
     while not selected_character:
-        screen.fill((59, 40, 0))
+        screen.fill((0, 0, 0))
         font = pygame.font.Font(None, 74)
-        text = font.render("Select your character!!!!!", True, (255, 255, 255))
+        text = font.render("Select your character", True, (255, 255, 255))
         screen.blit(text, (screen_width // 2 - text.get_width() // 2, 100))
 
-        # display characters
+        # Display characters
         screen.blit(p1_image, (screen_width // 2 - 200, 300))
         screen.blit(p2_image, (screen_width // 2 - 40, 300))
         screen.blit(p3_image, (screen_width // 2 + 120, 300))
@@ -58,18 +58,26 @@ def character_selection():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-#testinggggg
-character_selection()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_x, mouse_y = event.pos
+                if screen_width // 2 - 200 <= mouse_x <= screen_width // 2 - 120 and 300 <= mouse_y <= 380:
+                    selected_character = p1_image
+                elif screen_width // 2 - 40 <= mouse_x <= screen_width // 2 + 40 and 300 <= mouse_y <= 380:
+                    selected_character = p2_image
+                elif screen_width // 2 + 120 <= mouse_x <= screen_width // 2 + 200 and 300 <= mouse_y <= 380:
+                    selected_character = p3_image
+
+    return selected_character
 
 # Character selection
-player_image = pygame.image.load("p1.png") #note to myself: using p1 for now so player_image is defined while I change things
+player_image = character_selection()
 player_size = player_image.get_width()
 
 # player props
 player_x = screen_width // 2 - player_size // 2
 player_y = screen_height // 2 - player_size // 2
 player_speed = 4
-player_direction = "right"  # Initial direction
+player_direction = "left"  # Initial direction
 
 # squirrel props
 squirrel_x = random.randint(0, screen_width - player_size)
@@ -230,7 +238,7 @@ while running:
     apple_positions = new_apple_positions
 
     # Draw player (and direction)
-    if player_direction == "right":
+    if player_direction == "left":
         screen.blit(player_image, (player_x - view_x, player_y - view_y))
     else:
         flipped_player_image = pygame.transform.flip(player_image, True, False)
